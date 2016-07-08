@@ -33,10 +33,10 @@ import PerfectHTTP
 		var stringByDeletingLastPathComponent: String {
 			let url = URL(fileURLWithPath: self)
 			if let surl = try? url.deletingLastPathComponent() {
-				return surl.absoluteString ?? ""
+				return surl.relativeString ?? ""
 			}
 			return ""
-		}		
+		}
 	}
 #endif
 
@@ -110,27 +110,27 @@ public enum MustacheError : ErrorProtocol {
 /// Call `context.extendValues(with: values)` one or more times and then
 /// `context.requestCompleted(withCollector collector)` to complete the request and output the resulting content to the client.
 public protocol MustachePageHandler {
-    /// Called by the system when the handler needs to add values for the template.
-    func extendValuesForResponse(context contxt: MustacheEvaluationContext, collector: MustacheEvaluationOutputCollector)
+	/// Called by the system when the handler needs to add values for the template.
+	func extendValuesForResponse(context contxt: MustacheEvaluationContext, collector: MustacheEvaluationOutputCollector)
 }
 
 /** Convenience function to begin a mustache template request
- 
+
 ```swift
 Routing.Routes["/"] = {
-    request, response in
-    mustacheRequest(request: request, response: response, handler: UploadHandler(), path: webRoot + "/index.mustache")
+request, response in
+mustacheRequest(request: request, response: response, handler: UploadHandler(), path: webRoot + "/index.mustache")
 }
 ```
- 
- */
+
+*/
 public func mustacheRequest(request req: HTTPRequest, response: HTTPResponse, handler: MustachePageHandler, templatePath: String) {
-    
-    let context = MustacheEvaluationContext(webResponse: response)
-    context.templatePath = templatePath
-    let collector = MustacheEvaluationOutputCollector()
-    
-    handler.extendValuesForResponse(context: context, collector: collector)
+	
+	let context = MustacheEvaluationContext(webResponse: response)
+	context.templatePath = templatePath
+	let collector = MustacheEvaluationOutputCollector()
+	
+	handler.extendValuesForResponse(context: context, collector: collector)
 }
 
 /// This class represents an individual scope for mustache template values.
@@ -142,10 +142,10 @@ public class MustacheEvaluationContext {
 	
 	/// The parent of this context
 	public var parent: MustacheEvaluationContext? = nil
-    
+	
 	/// Provides access to the current HTTPResponse object
 	public var webResponse: HTTPResponse
-    
+	
 	/// Provides access to the current HTTPRequest object
 	public var webRequest: HTTPRequest {
 		return webResponse.request
@@ -154,9 +154,9 @@ public class MustacheEvaluationContext {
 	/// Complete path to the file being processed
 	public var templatePath: String?
 	
-    /// Mustache content for dynamic generation
-    public var templateContent: String?
-    
+	/// Mustache content for dynamic generation
+	public var templateContent: String?
+	
 	/// Returns the name of the current template file.
 	public var templateName: String? {
 		let nam = templatePath?.lastPathComponent
@@ -164,55 +164,55 @@ public class MustacheEvaluationContext {
 	}
 	
 	var mapValues: MapType
-    
-    init(webResponse: HTTPResponse, templatePath: String) {
-        self.webResponse = webResponse
-        self.templatePath = templatePath
-        self.mapValues = MapType()
-    }
-    
-    init(webResponse: HTTPResponse) {
-        self.webResponse = webResponse
-        self.mapValues = MapType()
-    }
-    
-    init(webResponse: HTTPResponse, map: MapType) {
-        self.webResponse = webResponse
-        self.mapValues = map
-    }
 	
-    /// All the template values have been completed and resulting content should be
-    /// formulated and returned to the client
-    public func requestCompleted(withCollector collector: MustacheEvaluationOutputCollector) throws {
-        self.webResponse.appendBody(string: try self.formulateResponse(withCollector: collector))
-        self.webResponse.completed()
-    }
-    
-    /// All the template values have been completed and resulting content should be
-    /// formulated and returned
-    public func formulateResponse(withCollector collector: MustacheEvaluationOutputCollector) throws -> String {
-        var maybeTemplate: MustacheTemplate?
-        
-        if let templatePath = self.templatePath {
-            maybeTemplate = try getTemplateFromCache(templatePath)
-            maybeTemplate?.templateName = templatePath.lastPathComponent
-        } else if let templateContent = self.templateContent {
-            let parser = MustacheParser()
-            maybeTemplate = try parser.parse(string: templateContent)
-            maybeTemplate?.templateName = "dynamic"
-        }
-        
-        guard let template = maybeTemplate else {
-            throw MustacheError.evaluationError("No templatePath or templateContent")
-        }
-        
-        template.evaluatePragmas(context: self, collector: collector)
-        template.evaluate(context: self, collector: collector)
-        
-        let fullString = collector.asString()
-        return fullString
-    }
-    
+	init(webResponse: HTTPResponse, templatePath: String) {
+		self.webResponse = webResponse
+		self.templatePath = templatePath
+		self.mapValues = MapType()
+	}
+	
+	init(webResponse: HTTPResponse) {
+		self.webResponse = webResponse
+		self.mapValues = MapType()
+	}
+	
+	init(webResponse: HTTPResponse, map: MapType) {
+		self.webResponse = webResponse
+		self.mapValues = map
+	}
+	
+	/// All the template values have been completed and resulting content should be
+	/// formulated and returned to the client
+	public func requestCompleted(withCollector collector: MustacheEvaluationOutputCollector) throws {
+		self.webResponse.appendBody(string: try self.formulateResponse(withCollector: collector))
+		self.webResponse.completed()
+	}
+	
+	/// All the template values have been completed and resulting content should be
+	/// formulated and returned
+	public func formulateResponse(withCollector collector: MustacheEvaluationOutputCollector) throws -> String {
+		var maybeTemplate: MustacheTemplate?
+		
+		if let templatePath = self.templatePath {
+			maybeTemplate = try getTemplateFromCache(templatePath)
+			maybeTemplate?.templateName = templatePath.lastPathComponent
+		} else if let templateContent = self.templateContent {
+			let parser = MustacheParser()
+			maybeTemplate = try parser.parse(string: templateContent)
+			maybeTemplate?.templateName = "dynamic"
+		}
+		
+		guard let template = maybeTemplate else {
+			throw MustacheError.evaluationError("No templatePath or templateContent")
+		}
+		
+		template.evaluatePragmas(context: self, collector: collector)
+		template.evaluate(context: self, collector: collector)
+		
+		let fullString = collector.asString()
+		return fullString
+	}
+	
 	func newChildContext() -> MustacheEvaluationContext {
 		let cc = MustacheEvaluationContext(webResponse: webResponse)
 		cc.parent = self
@@ -270,7 +270,7 @@ public class MustacheEvaluationOutputCollector {
 	/// Append a new string value to the collected output.
 	/// - parameter s: The string value which will be appended.
 	/// - parameter encoded: If true, the string value will be HTML encoded as it is appended. Defaults to true.
-    @discardableResult
+	@discardableResult
 	public func append(_ s: String, encoded: Bool = true) -> MustacheEvaluationOutputCollector {
 		if encoded {
 			output.append(self.defaultEncodingFunc(s))
@@ -399,9 +399,9 @@ public class MustachePartialTag : MustacheTag {
 			return
 		}
 		
-		let pageDir = page.stringByDeletingLastPathComponent
+		let pageDir = page.stringByDeletingLastPathComponent.characters.split(separator: "/").map(String.init).joined(separator: "/")
 		let fullPath = pageDir + "/" + self.tag + "." + mustacheExtension
-        do {
+		do {
 			let template = try getTemplateFromCache(fullPath)
 			template.evaluatePragmas(context: contxt, collector: collector)
 			
@@ -471,10 +471,10 @@ public class MustacheGroupTag : MustacheTag {
 				for child in children {
 					child.evaluate(context: newContext, collector: collector)
 				}
-			// case let v as [String:String]:
-			// 	let newContext = context.newChildContext(v)
-			// 	for child in children {
-			// 		child.evaluate(newContext, collector: collector)
+				// case let v as [String:String]:
+				// 	let newContext = context.newChildContext(v)
+				// 	for child in children {
+				// 		child.evaluate(newContext, collector: collector)
 			// 	}
 			case let sequence as MustacheEvaluationContext.SequenceType:
 				for item in sequence {
@@ -506,7 +506,7 @@ public class MustacheGroupTag : MustacheTag {
 			}
 		}
 	}
-
+	
 	func evaluateNeg(context contxt: MustacheEvaluationContext, collector: MustacheEvaluationOutputCollector) {
 		let cValue = contxt.getValue(named: tag)
 		if let value = cValue {
@@ -569,7 +569,7 @@ public class MustacheGroupTag : MustacheTag {
 }
 
 /// This class represents a mustache template which has been parsed and is ready to evaluate.
-/// It contains a series of "out of band" pragmas which can influence the evaluation, and a 
+/// It contains a series of "out of band" pragmas which can influence the evaluation, and a
 /// series of children which constitute the body of the template itself.
 public class MustacheTemplate : MustacheGroupTag {
 	
@@ -594,10 +594,10 @@ public class MustacheTemplate : MustacheGroupTag {
 	/// - parameter context: The `MustacheEvaluationContext` object which will be used to further evaluate the template.
 	/// - parameter collector: The `MustacheEvaluationOutputCollector` object which will collect all output from the template evaluation.
 	public func evaluatePragmas(context contxt: MustacheEvaluationContext, collector: MustacheEvaluationOutputCollector) {
-//		for pragma in pragmas {
-//			let d = pragma.parsePragma()
-//			...
-//		}
+		//		for pragma in pragmas {
+		//			let d = pragma.parsePragma()
+		//			...
+		//		}
 	}
 	
 	/// Evaluate the template using the given context and output collector.
@@ -746,7 +746,7 @@ public class MustacheParser {
 			// e is first non-white character
 			// # ^ ! >
 			switch e {
-			
+				
 			case "%": // pragma
 				let tagName = consumeTagName(firstChar: skipWhiteSpace())
 				let newTag = MustachePragmaTag()
@@ -798,10 +798,10 @@ public class MustacheParser {
 					throw MustacheError.syntaxError("The closing tag /" + tagName + " did not match " + activeList!.tag)
 				}
 				activeList = activeList!.parent
-			
+				
 			case "=": // set delimiters
 				try consumeSetDelimiters()
-			
+				
 			case "{": // unencoded name
 				handlingUnencodedName = true
 				let tagName = consumeTagName(firstChar: skipWhiteSpace())
@@ -842,7 +842,6 @@ public class MustacheParser {
 		return consumeTagName(into: &s)
 	}
 	
-	#if swift(>=3.0)
 	func consumeTagName(into s: inout String) -> String {
 		while let e = next() {
 			if handlingUnencodedName && e == "}" {
@@ -867,32 +866,6 @@ public class MustacheParser {
 		}
 		return String(scalars)
 	}
-	#else
-	func consumeTagName(inout into s: String) -> String {
-		while let e = next() {
-			if handlingUnencodedName && e == "}" {
-				handlingUnencodedName = false
-				continue
-			}
-			if e == closeDelimiters[0] {
-				testingPutback = String(e)
-				if consumePossibleCloseDelimiter(index: 1) {
-					break
-				}
-				s.append(testingPutback!)
-			} else {
-				s.append(e)
-			}
-		}
-		var scalars = s.unicodeScalars
-		var idx = scalars.endIndex.predecessor()
-		while scalars[idx].isWhiteSpace() {
-			scalars.remove(at: idx)
-			idx = idx.predecessor()
-		}
-		return String(scalars)
-	}
-	#endif
 	
 	func skipWhiteSpace() -> UnicodeScalar? {
 		var e = next()
