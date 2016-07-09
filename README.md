@@ -1,6 +1,8 @@
 # Perfect-Mustache
 Mustache template support for Perfect.
 
+[![GitHub version](https://badge.fury.io/gh/PerfectlySoft%2FPerfect-Mustache.svg)](https://badge.fury.io/gh/PerfectlySoft%2FPerfect-Mustache)
+
 This package is designed to work along with [Perfect](https://github.com/PerfectlySoft/Perfect). It provides Mustache template support for your server.
 
 To start, add this project as a dependency in your Package.swift file.
