@@ -260,7 +260,7 @@ public class MustacheEvaluationContext {
 public class MustacheEvaluationOutputCollector {
 	var output = [String]()
 	
-	var defaultEncodingFunc: (String) -> String = { $0.stringByEncodingHTML }
+	public var defaultEncodingFunc: (String) -> String = { $0.stringByEncodingHTML }
 	
 	/// Empty public initializer.
 	public init() {
@@ -318,7 +318,11 @@ public class MustacheTag {
 			collector.append(tag, encoded: false)
 		case .name:
 			if let value = contxt.getValue(named: tag) {
-				collector.append(String(value))
+				if let lambda = value as? (String, MustacheEvaluationContext) -> String {
+					collector.append(lambda(tag, contxt))
+				} else {
+					collector.append(String(value))
+				}
 			}
 		case .unencodedName:
 			if let value = contxt.getValue(named: tag) {
@@ -483,8 +487,10 @@ public class MustacheGroupTag : MustacheTag {
 						child.evaluate(context: newContext, collector: collector)
 					}
 				}
-			case let lambda as (String, MustacheEvaluationContext) -> String:
-				collector.append(lambda(bodyText(), contxt), encoded: false)
+			case let lambda as (String, MustacheEvaluationContext) -> String where !lambda(bodyText(), contxt).isEmpty:
+				for child in children {
+					child.evaluate(context: contxt, collector: collector)
+				}
 			case let stringValue as String where stringValue.characters.count > 0:
 				for child in children {
 					child.evaluate(context: contxt, collector: collector)
