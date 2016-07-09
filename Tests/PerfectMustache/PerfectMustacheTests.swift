@@ -60,6 +60,26 @@ class PerfectMustacheTests: XCTestCase {
 			XCTAssert(false)
 		}
 	}
+	
+	func testMustacheLambda() {
+		let usingTemplate = "TOP {\n{{#name}}\n{{name}}{{/name}}\n}\nBOTTOM"
+		do {
+			let nameVal = "Me!"
+			let template = try MustacheParser().parse(string: usingTemplate)
+			let d = ["name":{ (tag:String, context:MustacheEvaluationContext) -> String in return nameVal }] as [String:Any]
+			
+			let response = ShimHTTPResponse()
+			
+			let context = MustacheEvaluationContext(webResponse: response, map: d)
+			let collector = MustacheEvaluationOutputCollector()
+			template.evaluate(context: context, collector: collector)
+			
+			let result = collector.asString()
+			XCTAssertEqual(result, "TOP {\n\n\(nameVal)\n}\nBOTTOM")
+		} catch {
+			XCTAssert(false)
+		}
+	}
 
     static var allTests : [(String, (PerfectMustacheTests) -> () throws -> Void)] {
         return [
