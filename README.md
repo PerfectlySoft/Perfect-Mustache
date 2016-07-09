@@ -19,7 +19,7 @@ The following snippet illustrates how to use mustache templates in your URL hand
 }
 ```
 
-The template page handler, which you would impliment might look like the following.
+The template page handler, which you would impliment, might look like the following.
 
 ```swift
 struct TestHandler: MustachePageHandler { // all template handlers must inherit from PageHandler
@@ -30,6 +30,7 @@ struct TestHandler: MustachePageHandler { // all template handlers must inherit 
 	func extendValuesForResponse(context contxt: MustacheEvaluationContext, collector: MustacheEvaluationOutputCollector) {
 		var values = MustacheEvaluationContext.MapType()
 		values["value"] = "hello"
+		/// etc.
 		contxt.extendValues(with: values)
 		do {
 			try contxt.requestCompleted(withCollector: collector)
@@ -56,6 +57,10 @@ This mustache template processor supports:
 * {{! comments}}
 * {{> partials}}
 * lambdas
+
+**Partials**
+
+All files used for partials must be located in the same directory as the calling template. Additionally, all partial files *must* have the file extension of **mustache** but this extension must not be included in the partial tag itself. For example, to include the contents of the file *foo.mustache* you would use the tag ```{{> foo }}```.
 
 **Encoding**
 
