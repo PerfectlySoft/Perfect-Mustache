@@ -33,7 +33,7 @@ import PerfectHTTP
 		var stringByDeletingLastPathComponent: String {
 			let url = URL(fileURLWithPath: self)
 			if let surl = try? url.deletingLastPathComponent() {
-				return surl.relativeString ?? ""
+				return surl.resourceSpecifier ?? ""
 			}
 			return ""
 		}
@@ -418,12 +418,12 @@ public class MustachePartialTag : MustacheTag {
 	/// Override for evaluating the partial tag.
 	public override func evaluate(context contxt: MustacheEvaluationContext, collector: MustacheEvaluationOutputCollector) {
 		
-		guard let page = contxt.getCurrentFilePath() else {
+		guard let page = contxt.getCurrentFilePath() where !page.isEmpty else {
 			print("Exception while executing partial \(tag): unable to find template root directory")
 			return
 		}
-		
-		let pageDir = page.stringByDeletingLastPathComponent.characters.split(separator: "/").map(String.init).joined(separator: "/")
+		let slash = page[page.startIndex] == "/" ? "/" : ""
+		let pageDir = slash + page.stringByDeletingLastPathComponent.characters.split(separator: "/").map(String.init).joined(separator: "/")
 		let fullPath = pageDir + "/" + self.tag + "." + mustacheExtension
 		do {
 			let template = try getTemplateFromCache(fullPath)
