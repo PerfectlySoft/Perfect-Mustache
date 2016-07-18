@@ -51,7 +51,7 @@ class PerfectMustacheTests: XCTestCase {
 			
 			let response = ShimHTTPResponse()
 			
-			let context = MustacheEvaluationContext(webResponse: response, map: d)
+			let context = MustacheWebEvaluationContext(webResponse: response, map: d)
 			let collector = MustacheEvaluationOutputCollector()
 			template.evaluate(context: context, collector: collector)
 			
@@ -61,7 +61,7 @@ class PerfectMustacheTests: XCTestCase {
 		}
 	}
 	
-	func testMustacheLambda() {
+	func testMustacheLambda1() {
 		let usingTemplate = "TOP {\n{{#name}}\n{{name}}{{/name}}\n}\nBOTTOM"
 		do {
 			let nameVal = "Me!"
@@ -70,7 +70,41 @@ class PerfectMustacheTests: XCTestCase {
 			
 			let response = ShimHTTPResponse()
 			
-			let context = MustacheEvaluationContext(webResponse: response, map: d)
+			let context = MustacheWebEvaluationContext(webResponse: response, map: d)
+			let collector = MustacheEvaluationOutputCollector()
+			template.evaluate(context: context, collector: collector)
+			
+			let result = collector.asString()
+			XCTAssertEqual(result, "TOP {\n\n\(nameVal)\n}\nBOTTOM")
+		} catch {
+			XCTAssert(false)
+		}
+	}
+	
+	func testMustacheParser2() {
+		let usingTemplate = "TOP {\n{{#name}}\n{{name}}{{/name}}\n}\nBOTTOM"
+		do {
+			let template = try MustacheParser().parse(string: usingTemplate)
+			let d = ["name":"The name"] as [String:Any]
+			
+			let context = MustacheEvaluationContext(map: d)
+			let collector = MustacheEvaluationOutputCollector()
+			template.evaluate(context: context, collector: collector)
+			
+			XCTAssertEqual(collector.asString(), "TOP {\n\nThe name\n}\nBOTTOM")
+		} catch {
+			XCTAssert(false)
+		}
+	}
+	
+	func testMustacheLambda2() {
+		let usingTemplate = "TOP {\n{{#name}}\n{{name}}{{/name}}\n}\nBOTTOM"
+		do {
+			let nameVal = "Me!"
+			let template = try MustacheParser().parse(string: usingTemplate)
+			let d = ["name":{ (tag:String, context:MustacheEvaluationContext) -> String in return nameVal }] as [String:Any]
+			
+			let context = MustacheEvaluationContext(map: d)
 			let collector = MustacheEvaluationOutputCollector()
 			template.evaluate(context: context, collector: collector)
 			
@@ -82,8 +116,11 @@ class PerfectMustacheTests: XCTestCase {
 	}
 
     static var allTests : [(String, (PerfectMustacheTests) -> () throws -> Void)] {
-        return [
-			("testMustacheParser1", testMustacheParser1)
+		return [
+			("testMustacheParser1", testMustacheParser1),
+			("testMustacheLambda1", testMustacheLambda1),
+			("testMustacheParser2", testMustacheParser2),
+			("testMustacheLambda2", testMustacheLambda2)
         ]
     }
 }

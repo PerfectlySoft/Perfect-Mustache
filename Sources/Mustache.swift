@@ -111,22 +111,22 @@ public enum MustacheError : ErrorProtocol {
 /// `context.requestCompleted(withCollector collector)` to complete the request and output the resulting content to the client.
 public protocol MustachePageHandler {
 	/// Called by the system when the handler needs to add values for the template.
-	func extendValuesForResponse(context contxt: MustacheEvaluationContext, collector: MustacheEvaluationOutputCollector)
+	func extendValuesForResponse(context contxt: MustacheWebEvaluationContext, collector: MustacheEvaluationOutputCollector)
 }
 
 /** Convenience function to begin a mustache template request
 
 ```swift
-Routing.Routes["/"] = {
-request, response in
-mustacheRequest(request: request, response: response, handler: UploadHandler(), path: webRoot + "/index.mustache")
-}
+routes.add(method: .get, uri: "/", handler: {
+	request, response in
+	mustacheRequest(request: request, response: response, handler: UploadHandler(), path: webRoot + "/index.mustache")
+})
 ```
 
 */
 public func mustacheRequest(request req: HTTPRequest, response: HTTPResponse, handler: MustachePageHandler, templatePath: String) {
 	
-	let context = MustacheEvaluationContext(webResponse: response)
+	let context = MustacheWebEvaluationContext(webResponse: response)
 	context.templatePath = templatePath
 	let collector = MustacheEvaluationOutputCollector()
 	
@@ -143,14 +143,6 @@ public class MustacheEvaluationContext {
 	/// The parent of this context
 	public var parent: MustacheEvaluationContext? = nil
 	
-	/// Provides access to the current HTTPResponse object
-	public var webResponse: HTTPResponse
-	
-	/// Provides access to the current HTTPRequest object
-	public var webRequest: HTTPRequest {
-		return webResponse.request
-	}
-	
 	/// Complete path to the file being processed
 	public var templatePath: String?
 	
@@ -165,27 +157,13 @@ public class MustacheEvaluationContext {
 	
 	var mapValues: MapType
 	
-	init(webResponse: HTTPResponse, templatePath: String) {
-		self.webResponse = webResponse
+	public init(templatePath: String, map: MapType = MapType()) {
 		self.templatePath = templatePath
-		self.mapValues = MapType()
-	}
-	
-	init(webResponse: HTTPResponse) {
-		self.webResponse = webResponse
-		self.mapValues = MapType()
-	}
-	
-	init(webResponse: HTTPResponse, map: MapType) {
-		self.webResponse = webResponse
 		self.mapValues = map
 	}
 	
-	/// All the template values have been completed and resulting content should be
-	/// formulated and returned to the client
-	public func requestCompleted(withCollector collector: MustacheEvaluationOutputCollector) throws {
-		self.webResponse.appendBody(string: try self.formulateResponse(withCollector: collector))
-		self.webResponse.completed()
+	public init(map: MapType = MapType()) {
+		self.mapValues = map
 	}
 	
 	/// All the template values have been completed and resulting content should be
@@ -214,13 +192,13 @@ public class MustacheEvaluationContext {
 	}
 	
 	func newChildContext() -> MustacheEvaluationContext {
-		let cc = MustacheEvaluationContext(webResponse: webResponse)
+		let cc = MustacheEvaluationContext()
 		cc.parent = self
 		return cc
 	}
 	
 	func newChildContext(withMap with: MapType) -> MustacheEvaluationContext {
-		let cc = MustacheEvaluationContext(webResponse: webResponse, map: with)
+		let cc = MustacheEvaluationContext(map: with)
 		cc.parent = self
 		return cc
 	}
@@ -252,6 +230,48 @@ public class MustacheEvaluationContext {
 			return self.parent!.getCurrentFilePath()
 		}
 		return nil
+	}
+}
+
+/// This class represents an individual scope for mustache template values.
+/// A mustache template handler will return a `MustacheWebEvaluationContext.MapType` object as a result from its `PageHandler.valuesForResponse` function.
+public class MustacheWebEvaluationContext: MustacheEvaluationContext {
+	
+	/// Provides access to the current HTTPResponse object
+	public var webResponse: HTTPResponse
+	
+	/// Provides access to the current HTTPRequest object
+	public var webRequest: HTTPRequest {
+		return webResponse.request
+	}
+	
+	init(webResponse: HTTPResponse, templatePath: String, map: MapType = MapType()) {
+		self.webResponse = webResponse
+		super.init(templatePath: templatePath, map: map)
+	}
+	
+	init(webResponse: HTTPResponse, map: MapType = MapType()) {
+		self.webResponse = webResponse
+		super.init(map: map)
+	}
+	
+	override func newChildContext() -> MustacheEvaluationContext {
+		let cc = MustacheWebEvaluationContext(webResponse: webResponse)
+		cc.parent = self
+		return cc
+	}
+	
+	override func newChildContext(withMap with: MapType) -> MustacheEvaluationContext {
+		let cc = MustacheWebEvaluationContext(webResponse: webResponse, map: with)
+		cc.parent = self
+		return cc
+	}
+	
+	/// All the template values have been completed and resulting content should be
+	/// formulated and returned to the client
+	public func requestCompleted(withCollector collector: MustacheEvaluationOutputCollector) throws {
+		self.webResponse.appendBody(string: try self.formulateResponse(withCollector: collector))
+		self.webResponse.completed()
 	}
 }
 
