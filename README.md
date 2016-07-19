@@ -29,7 +29,7 @@ struct TestHandler: MustachePageHandler { // all template handlers must inherit 
 	// It is called by the system to allow the handler to return the set of values which will be used when populating the template.
 	// - parameter context: The MustacheEvaluationContext which provides access to the WebRequest containing all the information pertaining to the request
 	// - parameter collector: The MustacheEvaluationOutputCollector which can be used to adjust the template output. For example a `defaultEncodingFunc` could be installed to change how outgoing values are encoded.
-	func extendValuesForResponse(context contxt: MustacheEvaluationContext, collector: MustacheEvaluationOutputCollector) {
+	func extendValuesForResponse(context contxt: MustacheWebEvaluationContext, collector: MustacheEvaluationOutputCollector) {
 		var values = MustacheEvaluationContext.MapType()
 		values["value"] = "hello"
 		/// etc.
