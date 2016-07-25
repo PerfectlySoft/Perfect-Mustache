@@ -97,6 +97,19 @@ class PerfectMustacheTests: XCTestCase {
 		}
 	}
 	
+	func testMustacheParser3() {
+		let templateText = "TOP {\n{{#name}}\n{{name}}{{/name}}\n}\nBOTTOM"
+		do {
+			let d = ["name":"The name"] as [String:Any]
+			let context = MustacheEvaluationContext(templateContent: templateText, map: d)
+			let collector = MustacheEvaluationOutputCollector()
+			let responseString = try context.formulateResponse(withCollector: collector)
+			XCTAssertEqual(responseString, "TOP {\n\nThe name\n}\nBOTTOM")
+		} catch {
+			XCTAssert(false)
+		}
+	}
+	
 	func testMustacheLambda2() {
 		let usingTemplate = "TOP {\n{{#name}}\n{{name}}{{/name}}\n}\nBOTTOM"
 		do {

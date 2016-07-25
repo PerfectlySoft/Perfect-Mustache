@@ -106,7 +106,7 @@ public enum MustacheError : ErrorProtocol {
 	case evaluationError(String)
 }
 
-/// A mustache handler, which should be passed to `mustacheRequest`, generates values to fill a mustache template
+/// A mustache handler, which should be passed to `mustacheRequest`, generates values to fill a mustache template.
 /// Call `context.extendValues(with: values)` one or more times and then
 /// `context.requestCompleted(withCollector collector)` to complete the request and output the resulting content to the client.
 public protocol MustachePageHandler {
@@ -162,12 +162,17 @@ public class MustacheEvaluationContext {
 		self.mapValues = map
 	}
 	
+	public init(templateContent: String, map: MapType = MapType()) {
+		self.templateContent = templateContent
+		self.mapValues = map
+	}
+	
 	public init(map: MapType = MapType()) {
 		self.mapValues = map
 	}
 	
 	/// All the template values have been completed and resulting content should be
-	/// formulated and returned
+	/// formulated and returned.
 	public func formulateResponse(withCollector collector: MustacheEvaluationOutputCollector) throws -> String {
 		var maybeTemplate: MustacheTemplate?
 		
@@ -237,10 +242,10 @@ public class MustacheEvaluationContext {
 /// A mustache template handler will return a `MustacheWebEvaluationContext.MapType` object as a result from its `PageHandler.valuesForResponse` function.
 public class MustacheWebEvaluationContext: MustacheEvaluationContext {
 	
-	/// Provides access to the current HTTPResponse object
+	/// Provides access to the current HTTPResponse object.
 	public var webResponse: HTTPResponse
 	
-	/// Provides access to the current HTTPRequest object
+	/// Provides access to the current HTTPRequest object.
 	public var webRequest: HTTPRequest {
 		return webResponse.request
 	}
@@ -268,7 +273,7 @@ public class MustacheWebEvaluationContext: MustacheEvaluationContext {
 	}
 	
 	/// All the template values have been completed and resulting content should be
-	/// formulated and returned to the client
+	/// formulated and returned to the client.
 	public func requestCompleted(withCollector collector: MustacheEvaluationOutputCollector) throws {
 		self.webResponse.appendBody(string: try self.formulateResponse(withCollector: collector))
 		self.webResponse.completed()
@@ -306,7 +311,7 @@ public class MustacheEvaluationOutputCollector {
 	}
 }
 
-/// An individual mustache tag or plain-text section
+/// An individual mustache tag or plain-text section.
 public class MustacheTag {
 	var type = MustacheTagType.none
 	var tag = ""
