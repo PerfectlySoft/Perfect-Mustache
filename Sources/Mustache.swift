@@ -27,15 +27,13 @@ import PerfectHTTP
 	extension String {
 		var lastPathComponent: String {
 			let url = URL(fileURLWithPath: self)
-			return url.lastPathComponent ?? ""
+			return url.lastPathComponent 
 		}
 		
 		var stringByDeletingLastPathComponent: String {
 			let url = URL(fileURLWithPath: self)
-			if let surl = try? url.deletingLastPathComponent() {
-				return surl.resourceSpecifier ?? ""
-			}
-			return ""
+			let surl = url.deletingLastPathComponent()
+			return surl.path
 		}
 	}
 #endif
@@ -51,7 +49,7 @@ private func getTemplateFromCache(_ path: String) throws -> MustacheTemplate {
 	let modDate = file.modificationTime
 	
 	mustacheTemplateCacheLock.doWithReadLock {
-		if let fnd = mustacheTemplateCache[path] where fnd.0 == modDate {
+		if let fnd = mustacheTemplateCache[path], fnd.0 == modDate {
 			template = fnd.1.clone() as? MustacheTemplate
 		}
 	}
@@ -59,7 +57,7 @@ private func getTemplateFromCache(_ path: String) throws -> MustacheTemplate {
 		return templateW
 	}
 	try mustacheTemplateCacheLock.doWithWriteLock {
-		if let fnd = mustacheTemplateCache[path] where fnd.0 == modDate {
+		if let fnd = mustacheTemplateCache[path], fnd.0 == modDate {
 			template = fnd.1.clone() as? MustacheTemplate
 		} else {
 			try file.open()
@@ -99,7 +97,7 @@ enum MustacheTagType {
 }
 
 /// This enum type represents the parsing and the runtime evaluation exceptions which may be generated.
-public enum MustacheError : ErrorProtocol {
+public enum MustacheError : Error {
 	/// The mustache template was malformed.
 	case syntaxError(String)
 	/// An exception occurred while evaluating the template.
@@ -423,7 +421,7 @@ public class MustachePartialTag : MustacheTag {
 	/// Override for evaluating the partial tag.
 	public override func evaluate(context contxt: MustacheEvaluationContext, collector: MustacheEvaluationOutputCollector) {
 		
-		guard let page = contxt.getCurrentFilePath() where !page.isEmpty else {
+		guard let page = contxt.getCurrentFilePath(), !page.isEmpty else {
 			print("Exception while executing partial \(tag): unable to find template root directory")
 			return
 		}
