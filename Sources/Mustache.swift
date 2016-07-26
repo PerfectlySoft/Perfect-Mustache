@@ -21,22 +21,18 @@ import PerfectThread
 import PerfectLib
 import PerfectHTTP
 
-#if os(OSX)
-	import Foundation
-	
-	extension String {
-		var lastPathComponent: String {
-			let url = URL(fileURLWithPath: self)
-			return url.lastPathComponent 
-		}
-		
-		var stringByDeletingLastPathComponent: String {
-			let url = URL(fileURLWithPath: self)
-			let surl = url.deletingLastPathComponent()
-			return surl.path
-		}
+import Foundation
+
+extension String {
+	var lastPathComponent: String {
+		return URL(fileURLWithPath: self).lastPathComponent ?? ""
 	}
-#endif
+	
+	var deletingLastPathComponent: String {
+		let pth = try? URL(fileURLWithPath: self).deletingLastPathComponent()
+		return pth?.path ?? ""
+	}
+}
 
 let mustacheExtension = "mustache"
 
@@ -426,7 +422,7 @@ public class MustachePartialTag : MustacheTag {
 			return
 		}
 		let slash = page[page.startIndex] == "/" ? "/" : ""
-		let pageDir = slash + page.stringByDeletingLastPathComponent.characters.split(separator: "/").map(String.init).joined(separator: "/")
+		let pageDir = slash + page.deletingLastPathComponent.characters.split(separator: "/").map(String.init).joined(separator: "/")
 		let fullPath = pageDir + "/" + self.tag + "." + mustacheExtension
 		do {
 			let template = try getTemplateFromCache(fullPath)
