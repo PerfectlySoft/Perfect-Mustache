@@ -421,8 +421,9 @@ public class MustachePartialTag : MustacheTag {
 			print("Exception while executing partial \(tag): unable to find template root directory")
 			return
 		}
-		let slash = page[page.startIndex] == "/" ? "/" : ""
-		let pageDir = slash + page.deletingLastPathComponent.characters.split(separator: "/").map(String.init).joined(separator: "/")
+		let withoutLast = page.deletingLastPathComponent
+		let slash = withoutLast[withoutLast.startIndex] == "/" ? "/" : ""
+		let pageDir = slash + withoutLast.characters.split(separator: "/").map(String.init).joined(separator: "/")
 		let fullPath = pageDir + "/" + self.tag + "." + mustacheExtension
 		do {
 			let template = try getTemplateFromCache(fullPath)
