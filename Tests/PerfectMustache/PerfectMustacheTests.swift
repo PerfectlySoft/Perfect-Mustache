@@ -1,6 +1,7 @@
 import XCTest
 import PerfectHTTP
 import PerfectNet
+import PerfectLib
 @testable import PerfectMustache
 
 class ShimHTTPRequest: HTTPRequest {
@@ -127,13 +128,49 @@ class PerfectMustacheTests: XCTestCase {
 			XCTAssert(false)
 		}
 	}
+	
+	func testPartials1() {
+		let src = "{{> top }} {\n{{#name}}\n{{name}}{{/name}}\n}\n{{> bottom }}"
+		let main = File("./foo.mustache")
+		let top = File("./top.mustache")
+		let bottom = File("./bottom.mustache")
+		let d = ["name":"The name"] as [String:Any]
+		
+		defer {
+			main.delete()
+			top.delete()
+			bottom.delete()
+		}
+		do {
+			try main.open(.truncate)
+			try top.open(.truncate)
+			try bottom.open(.truncate)
+			
+			try main.write(string: src)
+			try top.write(string: "TOP")
+			try bottom.write(string: "BOTTOM")
+			
+			main.close()
+			top.close()
+			bottom.close()
+			
+			let context = MustacheEvaluationContext(templatePath: "./foo.mustache", map: d)
+			let collector = MustacheEvaluationOutputCollector()
+			let result = try context.formulateResponse(withCollector: collector)
+			XCTAssertEqual(result, "TOP {\n\n\(d["name"]!)\n}\nBOTTOM")
+			
+		} catch {
+			XCTAssert(false, "\(error)")
+		}
+	}
 
     static var allTests : [(String, (PerfectMustacheTests) -> () throws -> Void)] {
 		return [
 			("testMustacheParser1", testMustacheParser1),
 			("testMustacheLambda1", testMustacheLambda1),
 			("testMustacheParser2", testMustacheParser2),
-			("testMustacheLambda2", testMustacheLambda2)
+			("testMustacheLambda2", testMustacheLambda2),
+			("testPartials1", testPartials1)
         ]
     }
 }
