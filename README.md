@@ -1,7 +1,10 @@
 # Perfect-Mustache
+
+[![GitHub version](https://badge.fury.io/gh/PerfectlySoft%2FPerfect-Mustache.svg)](https://badge.fury.io/gh/PerfectlySoft%2FPerfect-Mustache) [![Gitter](https://badges.gitter.im/PerfectlySoft/PerfectDocs.svg)](https://gitter.im/PerfectlySoft/PerfectDocs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 Mustache template support for Perfect.
 
-[![GitHub version](https://badge.fury.io/gh/PerfectlySoft%2FPerfect-Mustache.svg)](https://badge.fury.io/gh/PerfectlySoft%2FPerfect-Mustache)
+
 
 This package is designed to work along with [Perfect](https://github.com/PerfectlySoft/Perfect). It provides Mustache template support for your server.
 
