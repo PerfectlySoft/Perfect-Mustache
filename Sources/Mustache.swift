@@ -340,12 +340,12 @@ public class MustacheTag {
 				if let lambda = value as? (String, MustacheEvaluationContext) -> String {
 					collector.append(lambda(tag, contxt))
 				} else {
-					collector.append(String(value))
+					collector.append("\(value)")
 				}
 			}
 		case .unencodedName:
 			if let value = contxt.getValue(named: tag) {
-				collector.append(String(value), encoded: false)
+				collector.append("\(value)", encoded: false)
 			}
 		case .pragma, .bang:
 			() // ignored
@@ -734,7 +734,7 @@ public class MustacheParser {
 				}
 				currTag.tag.append(testingPutback!)
 			} else {
-				currTag.tag.append(e)
+				currTag.tag.append(String(Character(e)))
 			}
 		}
 	}
@@ -744,7 +744,7 @@ public class MustacheParser {
 			return true
 		}
 		if let e = next() {
-			testingPutback!.append(e)
+			testingPutback!.append(String(Character(e)))
 			if e == openDelimiters[idx] {
 				return consumePossibleOpenDelimiter(index: 1 + idx)
 			}
@@ -758,7 +758,7 @@ public class MustacheParser {
 		}
 		if let e = next() {
 			if e == closeDelimiters[idx] {
-				testingPutback!.append(e)
+				testingPutback!.append(String(Character(e)))
 				return consumePossibleCloseDelimiter(index: 1 + idx)
 			}
 		}
@@ -881,7 +881,7 @@ public class MustacheParser {
 				}
 				s.append(testingPutback!)
 			} else {
-				s.append(e)
+				s.append(String(Character(e)))
 			}
 		}
 		var scalars = s.unicodeScalars
@@ -915,7 +915,7 @@ public class MustacheParser {
 				
 				e = next()
 				if e != nil && !(e!).isWhiteSpace() {
-					openD.append(e!)
+					openD.append(String(Character(e!)))
 				} else {
 					break
 				}
@@ -937,7 +937,7 @@ public class MustacheParser {
 				
 				e = next()
 				if e != nil && !(e!).isWhiteSpace() && e! != "=" {
-					closeD.append(e!)
+					closeD.append(String(Character(e!)))
 				} else {
 					break
 				}
