@@ -1,5 +1,5 @@
 import XCTest
-@testable import PerfectMustacheTestSuite
+@testable import PerfectMustacheTests
 
 XCTMain([
      testCase(PerfectMustacheTests.allTests),
