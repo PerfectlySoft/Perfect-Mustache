@@ -23,17 +23,6 @@ import PerfectHTTP
 
 import Foundation
 
-extension String {
-	var lastPathComponent: String {
-		return URL(fileURLWithPath: self).lastPathComponent ?? ""
-	}
-	
-	var deletingLastPathComponent: String {
-		let pth = try? URL(fileURLWithPath: self).deletingLastPathComponent()
-		return pth?.path ?? ""
-	}
-}
-
 let mustacheExtension = "mustache"
 
 private var mustacheTemplateCache = [String: (Int, MustacheTemplate)]()
@@ -145,7 +134,7 @@ public class MustacheEvaluationContext {
 	
 	/// Returns the name of the current template file.
 	public var templateName: String? {
-		let nam = templatePath?.lastPathComponent
+		let nam = templatePath?.lastFilePathComponent
 		return nam
 	}
 	
@@ -172,7 +161,7 @@ public class MustacheEvaluationContext {
 		
 		if let templatePath = self.templatePath {
 			maybeTemplate = try getTemplateFromCache(templatePath)
-			maybeTemplate?.templateName = templatePath.lastPathComponent
+			maybeTemplate?.templateName = templatePath.lastFilePathComponent
 		} else if let templateContent = self.templateContent {
 			let parser = MustacheParser()
 			maybeTemplate = try parser.parse(string: templateContent)
@@ -421,7 +410,7 @@ public class MustachePartialTag : MustacheTag {
 			print("Exception while executing partial \(tag): unable to find template root directory")
 			return
 		}
-		let withoutLast = page.deletingLastPathComponent
+		let withoutLast = page.deletingLastFilePathComponent
 		let slash = withoutLast[withoutLast.startIndex] == "/" ? "/" : ""
 		let pageDir = slash + withoutLast.characters.split(separator: "/").map(String.init).joined(separator: "/")
 		let fullPath = pageDir + "/" + self.tag + "." + mustacheExtension
