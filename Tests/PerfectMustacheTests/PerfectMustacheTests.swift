@@ -23,6 +23,7 @@ class ShimHTTPRequest: HTTPRequest {
 	var postBodyBytes: [UInt8]? = nil
 	var postBodyString: String? = nil
 	var postFileUploads: [MimeReader.BodySpec]? = nil
+	var scratchPad = [String:Any]()
 }
 
 class ShimHTTPResponse: HTTPResponse {
