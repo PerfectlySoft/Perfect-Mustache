@@ -34,7 +34,7 @@ A comprehensive list of open issues can be found at [http://jira.perfect.org:808
 To start, add this project as a dependency in your Package.swift file.
 
 ```swift
-.Package(url: "https://github.com/PerfectlySoft/Perfect-Mustache.git", versions: Version(0,0,0)..<Version(10,0,0))
+.Package(url: "https://github.com/PerfectlySoft/Perfect-Mustache.git", majorVersion: 2, minor: 0)
 ```
 
 The following snippet illustrates how to use mustache templates in your URL handler. In this example, the template named "test.html" would be located in your server's web root directory.
