@@ -411,8 +411,14 @@ public class MustachePartialTag : MustacheTag {
 			return
 		}
 		let withoutLast = page.deletingLastFilePathComponent
-		let slash = withoutLast[withoutLast.startIndex] == "/" ? "/" : ""
-		let pageDir = slash + withoutLast.characters.split(separator: "/").map(String.init).joined(separator: "/")
+		let pageDir: String
+		if withoutLast.isEmpty { // foo.mustache
+			pageDir = "."
+		} else if withoutLast.hasSuffix("/") {
+			pageDir = withoutLast
+		} else {
+			pageDir = "."
+		}
 		let fullPath = pageDir + "/" + self.tag + "." + mustacheExtension
 		do {
 			let template = try getTemplateFromCache(fullPath)
