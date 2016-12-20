@@ -96,7 +96,7 @@ struct TestHandler: MustachePageHandler { // all template handlers must inherit 
 }
 ```
 
-Look at the [UploadEnumerator](https://github.com/PerfectlySoft/PerfectExample-UploadEnumerator) example for a more concrete example.
+Look at the [UploadEnumerator](https://github.com/PerfectExamples/Perfect-UploadEnumerator) example for a more concrete example.
 
 **Tag Support**
 
