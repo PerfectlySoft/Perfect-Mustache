@@ -195,7 +195,17 @@ public class MustacheEvaluationContext {
 	/// - parameter named: The name of the value to find
 	/// - returns: The value, if found, or nil
 	public func getValue(named nam: String) -> MapType.Value? {
-		let v = mapValues[nam]
+		let values = nam.components(separatedBy: ".")
+		
+		var cntxt: MapType.Value? = mapValues
+		for val in values {
+			guard let prev = cntxt as? MapType else {
+				break
+			}
+			cntxt = prev[val]
+		}
+		
+		let v = cntxt
 		if v == nil && parent != nil {
 			return parent?.getValue(named: nam)
 		}
