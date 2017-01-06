@@ -164,6 +164,42 @@ class PerfectMustacheTests: XCTestCase {
 			XCTAssert(false, "\(error)")
 		}
 	}
+	
+	func testDotNotation1() {
+		let usingTemplate = "TOP {\n{{name.first}} {{name.last}}\n}\nBOTTOM"
+		do {
+			let template = try MustacheParser().parse(string: usingTemplate)
+			let d = ["name": ["first": "The", "last": "name"]] as [String:Any]
+			
+			let response = ShimHTTPResponse()
+			
+			let context = MustacheWebEvaluationContext(webResponse: response, map: d)
+			let collector = MustacheEvaluationOutputCollector()
+			template.evaluate(context: context, collector: collector)
+			
+			XCTAssertEqual(collector.asString(), "TOP {\nThe name\n}\nBOTTOM")
+		} catch {
+			XCTAssert(false)
+		}
+	}
+	
+	func testDotNotation2() {
+		let usingTemplate = "TOP {\n{{foo.data.name.first}} {{foo.data.name.last}}\n}\nBOTTOM"
+		do {
+			let template = try MustacheParser().parse(string: usingTemplate)
+			let d = ["foo": ["data": ["name": ["first": "The", "last": "name"]]]] as [String:Any]
+			
+			let response = ShimHTTPResponse()
+			
+			let context = MustacheWebEvaluationContext(webResponse: response, map: d)
+			let collector = MustacheEvaluationOutputCollector()
+			template.evaluate(context: context, collector: collector)
+			
+			XCTAssertEqual(collector.asString(), "TOP {\nThe name\n}\nBOTTOM")
+		} catch {
+			XCTAssert(false)
+		}
+	}
 
     static var allTests : [(String, (PerfectMustacheTests) -> () throws -> Void)] {
 		return [
@@ -171,7 +207,9 @@ class PerfectMustacheTests: XCTestCase {
 			("testMustacheLambda1", testMustacheLambda1),
 			("testMustacheParser2", testMustacheParser2),
 			("testMustacheLambda2", testMustacheLambda2),
-			("testPartials1", testPartials1)
+			("testPartials1", testPartials1),
+			("testDotNotation1", testDotNotation1),
+			("testDotNotation2", testDotNotation2)
         ]
     }
 }
