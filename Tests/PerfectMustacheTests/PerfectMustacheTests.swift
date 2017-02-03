@@ -32,8 +32,8 @@ class ShimHTTPResponse: HTTPResponse {
 	var isStreaming = false
 	var bodyBytes = [UInt8]()
 	func header(_ named: HTTPResponseHeader.Name) -> String? { return nil }
-	func addHeader(_ named: HTTPResponseHeader.Name, value: String) {}
-	func setHeader(_ named: HTTPResponseHeader.Name, value: String) {}
+	func addHeader(_ named: HTTPResponseHeader.Name, value: String) -> Self { return self }
+	func setHeader(_ named: HTTPResponseHeader.Name, value: String) -> Self { return self }
 	var headers = AnyIterator<(HTTPResponseHeader.Name, String)> { return nil }
 	func addCookie(_: PerfectHTTP.HTTPCookie) {}
 	func appendBody(bytes: [UInt8]) {}
