@@ -655,7 +655,7 @@ public class MustacheParser {
 	var handlingUnencodedName = false
 	var testingPutback: String?
 	
-	typealias UGen = String.UnicodeScalarView.Generator
+	typealias UGen = String.UnicodeScalarView.Iterator
 	
 	var g: UGen?
 	var offset = -1
