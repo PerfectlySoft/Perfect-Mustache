@@ -22,6 +22,6 @@ import PackageDescription
 let package = Package(
 	name: "PerfectMustache",
 	targets: [],
-	dependencies: [.Package(url: "https://github.com/PerfectlySoft/Perfect-HTTP.git", majorVersion: 2)],
+	dependencies: [.Package(url: "https://github.com/PerfectlySoft/Perfect-HTTP.git", majorVersion: 3)],
 	exclude: []
 )
