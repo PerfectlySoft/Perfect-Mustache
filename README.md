@@ -23,7 +23,7 @@
 
 <p align="center">
     <a href="https://developer.apple.com/swift/" target="_blank">
-        <img src="https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat" alt="Swift 3.0">
+        <img src="https://img.shields.io/badge/Swift-4.0-orange.svg?style=flat" alt="Swift 4.0">
     </a>
     <a href="https://developer.apple.com/swift/" target="_blank">
         <img src="https://img.shields.io/badge/Platforms-OS%20X%20%7C%20Linux%20-lightgray.svg?style=flat" alt="Platforms OS X | Linux">
@@ -41,8 +41,6 @@
 
 Mustache template support for Perfect.
 
-
-
 This package is designed to work along with [Perfect](https://github.com/PerfectlySoft/Perfect). It provides Mustache template support for your server.
 
 ## Issues
@@ -58,7 +56,7 @@ A comprehensive list of open issues can be found at [http://jira.perfect.org:808
 To start, add this project as a dependency in your Package.swift file.
 
 ```swift
-.Package(url: "https://github.com/PerfectlySoft/Perfect-Mustache.git", majorVersion: 2, minor: 0)
+.Package(url: "https://github.com/PerfectlySoft/Perfect-Mustache.git", majorVersion: 3)
 ```
 
 The following snippet illustrates how to use mustache templates in your URL handler. In this example, the template named "test.html" would be located in your server's web root directory.
@@ -134,3 +132,7 @@ Functions can be added to the values dictionary. These will be executed and the 
 ```
 
 The ```tag``` parameter will be the tag name. For example the tag {{name}} would give you the value "name" for the tag parameter.
+
+## Further Documentation
+For more information, please visit [perfect.org](http://www.perfect.org/docs/mustache.html).
+
