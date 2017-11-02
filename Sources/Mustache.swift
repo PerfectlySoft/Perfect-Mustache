@@ -422,7 +422,7 @@ public class MustachePartialTag : MustacheTag {
 		}
 		let withoutLast = page.deletingLastFilePathComponent
 		let slash = withoutLast[withoutLast.startIndex] == "/" ? "/" : ""
-		let pageDir = slash + withoutLast.characters.split(separator: "/").map(String.init).joined(separator: "/")
+		let pageDir = slash + withoutLast.split(separator: "/").map(String.init).joined(separator: "/")
 		let fullPath = pageDir + "/" + self.tag + "." + mustacheExtension
 		do {
 			let template = try getTemplateFromCache(fullPath)
@@ -452,9 +452,9 @@ public class MustachePragmaTag : MustacheTag {
 	/// - returns: A Dictionary containing the pragma names and values.
 	public func parsePragma() -> Dictionary<String, String> {
 		var d = Dictionary<String, String>()
-		let commaSplit = tag.characters.split() { $0 == Character(",") }.map { String($0) }
+		let commaSplit = tag.split() { $0 == Character(",") }.map { String($0) }
 		for section in commaSplit {
-			let colonSplit = section.characters.split() { $0 == Character(":") }.map { String($0) }
+			let colonSplit = section.split() { $0 == Character(":") }.map { String($0) }
 			if colonSplit.count == 1 {
 				d[colonSplit[0]] = ""
 			} else if colonSplit.count > 1 {
@@ -510,7 +510,7 @@ public class MustacheGroupTag : MustacheTag {
 				for child in children {
 					child.evaluate(context: contxt, collector: collector)
 				}
-			case let stringValue as String where stringValue.characters.count > 0:
+			case let stringValue as String where stringValue.count > 0:
 				for child in children {
 					child.evaluate(context: contxt, collector: collector)
 				}

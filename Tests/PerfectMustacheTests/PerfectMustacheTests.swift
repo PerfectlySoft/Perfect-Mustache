@@ -5,6 +5,8 @@ import PerfectLib
 @testable import PerfectMustache
 
 class ShimHTTPRequest: HTTPRequest {
+	var pathComponents: [String] = []
+	
 	var method = HTTPMethod.get
 	var path = "/"
 	var queryParams = [(String, String)]()
@@ -27,6 +29,7 @@ class ShimHTTPRequest: HTTPRequest {
 }
 
 class ShimHTTPResponse: HTTPResponse {
+	func next() {}
 	var request: HTTPRequest = ShimHTTPRequest()
 	var status: HTTPResponseStatus = .ok
 	var isStreaming = false
