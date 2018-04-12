@@ -93,7 +93,8 @@ Look at the [UploadEnumerator](https://github.com/PerfectExamples/Perfect-Upload
 This mustache template processor supports:
 
 * {{regularTags}}
-* {{& unencodedTags}}
+* {{{unencodedTags}}}
+* {{& unescapedTags}}
 * {{# sections}} ... {{/sections}}
 * {{^ invertedSections}} ... {{/invertedSections}}
 * {{! comments}}
