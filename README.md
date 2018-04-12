@@ -51,6 +51,14 @@ To start, add this project as a dependency in your Package.swift file.
 .Package(url: "https://github.com/PerfectlySoft/Perfect-Mustache.git", majorVersion: 3)
 ```
 
+Basic usage:
+
+```swift
+let map: [String:Any] = ["fullName":fullName, "uri":uri, "authToken":authToken]
+let ctx = MustacheEvaluationContext(templatePath: emailTemplate, map: map)
+let result = try ctx.formulateResponse(withCollector: MustacheEvaluationOutputCollector())
+```
+
 The following snippet illustrates how to use mustache templates in your URL handler. In this example, the template named "test.html" would be located in your server's web root directory.
 
 ```swift
