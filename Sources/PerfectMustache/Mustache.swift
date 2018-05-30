@@ -610,7 +610,11 @@ public class MustacheTemplate : MustacheGroupTag {
 	override func populateClone(_ tag: MustacheTag) {
 		super.populateClone(tag)
 		if let template = tag as? MustacheTemplate {
-			template.pragmas = self.pragmas.flatMap { $0.clone() as? MustachePragmaTag }
+			#if swift(>=4.1)
+				template.pragmas = self.pragmas.compactMap { $0.clone() as? MustachePragmaTag }
+			#else
+				template.pragmas = self.pragmas.flatMap { $0.clone() as? MustachePragmaTag }
+			#endif
 			self.templateName = template.templateName
 		}
 	}
