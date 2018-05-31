@@ -48,7 +48,7 @@ This package is designed to work along with [Perfect](https://github.com/Perfect
 To start, add this project as a dependency in your Package.swift file.
 
 ```swift
-.package(url: "https://github.com/PerfectlySoft/Perfect-Mustache.git", .branch("master"))
+.package(url: "https://github.com/PerfectlySoft/Perfect-Mustache.git", from: "3.0.0")
 ```
 
 Basic usage:
