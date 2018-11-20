@@ -51,6 +51,15 @@ To start, add this project as a dependency in your Package.swift file.
 .package(url: "https://github.com/PerfectlySoft/Perfect-Mustache.git", from: "3.0.0")
 ```
 
+Then, add "PerfectMustache" to the list of dependencies for the target that will use PerfectMustache.
+
+Example target configuration:
+
+```swift
+targets: [.target(name: "PerfectTemplate", dependencies: ["PerfectHTTPServer", "PerfectMustache"])]
+```
+
+
 Basic usage:
 
 ```swift
