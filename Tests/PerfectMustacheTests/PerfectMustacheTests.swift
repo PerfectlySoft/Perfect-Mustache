@@ -1,50 +1,6 @@
 import XCTest
-import PerfectHTTP
-import PerfectNet
 import PerfectLib
 @testable import PerfectMustache
-
-class ShimHTTPRequest: HTTPRequest {
-	var pathComponents: [String] = []
-	
-	var method = HTTPMethod.get
-	var path = "/"
-	var queryParams = [(String, String)]()
-	var protocolVersion = (1, 1)
-	var remoteAddress = (host: "127.0.0.1", port: 8000 as UInt16)
-	var serverAddress = (host: "127.0.0.1", port: 8282 as UInt16)
-	var serverName = "my_server"
-	var documentRoot = "./webroot"
-	var connection = NetTCP()
-	var urlVariables = [String:String]()
-	func header(_ named: HTTPRequestHeader.Name) -> String? { return nil }
-	func addHeader(_ named: HTTPRequestHeader.Name, value: String) {}
-	func setHeader(_ named: HTTPRequestHeader.Name, value: String) {}
-	var headers = AnyIterator<(HTTPRequestHeader.Name, String)> { return nil }
-	var postParams = [(String, String)]()
-	var postBodyBytes: [UInt8]? = nil
-	var postBodyString: String? = nil
-	var postFileUploads: [MimeReader.BodySpec]? = nil
-	var scratchPad = [String:Any]()
-}
-
-class ShimHTTPResponse: HTTPResponse {
-	func next() {}
-	var request: HTTPRequest = ShimHTTPRequest()
-	var status: HTTPResponseStatus = .ok
-	var isStreaming = false
-	var bodyBytes = [UInt8]()
-	func header(_ named: HTTPResponseHeader.Name) -> String? { return nil }
-	func addHeader(_ named: HTTPResponseHeader.Name, value: String) -> Self { return self }
-	func setHeader(_ named: HTTPResponseHeader.Name, value: String) -> Self { return self }
-	var headers = AnyIterator<(HTTPResponseHeader.Name, String)> { return nil }
-	func addCookie(_: PerfectHTTP.HTTPCookie) {}
-	func appendBody(bytes: [UInt8]) {}
-	func appendBody(string: String) {}
-	func setBody(json: [String:Any]) throws {}
-	func push(callback: @escaping (Bool) -> ()) {}
-	func completed() {}
-}
 
 class PerfectMustacheTests: XCTestCase {
 	
@@ -54,9 +10,7 @@ class PerfectMustacheTests: XCTestCase {
 			let template = try MustacheParser().parse(string: usingTemplate)
 			let d = ["name":"The name"] as [String:Any]
 			
-			let response = ShimHTTPResponse()
-			
-			let context = MustacheWebEvaluationContext(webResponse: response, map: d)
+			let context = MustacheEvaluationContext(map: d)
 			let collector = MustacheEvaluationOutputCollector()
 			template.evaluate(context: context, collector: collector)
 			
@@ -73,9 +27,7 @@ class PerfectMustacheTests: XCTestCase {
 			let template = try MustacheParser().parse(string: usingTemplate)
 			let d = ["name":{ (tag:String, context:MustacheEvaluationContext) -> String in return nameVal }] as [String:Any]
 			
-			let response = ShimHTTPResponse()
-			
-			let context = MustacheWebEvaluationContext(webResponse: response, map: d)
+			let context = MustacheEvaluationContext(map: d)
 			let collector = MustacheEvaluationOutputCollector()
 			template.evaluate(context: context, collector: collector)
 			
@@ -174,9 +126,7 @@ class PerfectMustacheTests: XCTestCase {
 			let template = try MustacheParser().parse(string: usingTemplate)
 			let d = ["name": ["first": "The", "last": "name"]] as [String:Any]
 			
-			let response = ShimHTTPResponse()
-			
-			let context = MustacheWebEvaluationContext(webResponse: response, map: d)
+			let context = MustacheEvaluationContext(map: d)
 			let collector = MustacheEvaluationOutputCollector()
 			template.evaluate(context: context, collector: collector)
 			
@@ -192,9 +142,7 @@ class PerfectMustacheTests: XCTestCase {
 			let template = try MustacheParser().parse(string: usingTemplate)
 			let d = ["foo": ["data": ["name": ["first": "The", "last": "name"]]]] as [String:Any]
 			
-			let response = ShimHTTPResponse()
-			
-			let context = MustacheWebEvaluationContext(webResponse: response, map: d)
+			let context = MustacheEvaluationContext(map: d)
 			let collector = MustacheEvaluationOutputCollector()
 			template.evaluate(context: context, collector: collector)
 			
