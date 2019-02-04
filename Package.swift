@@ -9,9 +9,11 @@ let package = Package(
 		.library(name: "PerfectMustache", targets: ["PerfectMustache"])
 	],
 	dependencies: [
+		.package(url: "https://github.com/PerfectlySoft/Perfect-Thread.git", from: "3.0.0"),
+		.package(url: "https://github.com/PerfectlySoft/PerfectLib.git", from: "3.0.0"),
 	],
 	targets: [
-		.target(name: "PerfectMustache", dependencies: []),
+		.target(name: "PerfectMustache", dependencies: ["PerfectThread", "PerfectLib"]),
 		.testTarget(name: "PerfectMustacheTests", dependencies: ["PerfectMustache"])
 	]
 )
