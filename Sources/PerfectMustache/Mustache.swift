@@ -19,8 +19,6 @@
 
 import PerfectThread
 import PerfectLib
-import PerfectHTTP
-
 import Foundation
 
 let mustacheExtension = "mustache"
@@ -89,56 +87,24 @@ public enum MustacheError : Error {
 	case evaluationError(String)
 }
 
-/// A mustache handler, which should be passed to `mustacheRequest`, generates values to fill a mustache template.
-/// Call `context.extendValues(with: values)` one or more times and then
-/// `context.requestCompleted(withCollector collector)` to complete the request and output the resulting content to the client.
-public protocol MustachePageHandler {
-	/// Called by the system when the handler needs to add values for the template.
-	func extendValuesForResponse(context contxt: MustacheWebEvaluationContext, collector: MustacheEvaluationOutputCollector)
-}
-
-/** Convenience function to begin a mustache template request
-
-```swift
-routes.add(method: .get, uri: "/", handler: {
-	request, response in
-	mustacheRequest(request: request, response: response, handler: UploadHandler(), path: webRoot + "/index.mustache")
-})
-```
-
-*/
-public func mustacheRequest(request req: HTTPRequest, response: HTTPResponse, handler: MustachePageHandler, templatePath: String) {
-	
-	let context = MustacheWebEvaluationContext(webResponse: response)
-	context.templatePath = templatePath
-	let collector = MustacheEvaluationOutputCollector()
-	
-	handler.extendValuesForResponse(context: context, collector: collector)
-}
-
 /// This class represents an individual scope for mustache template values.
 /// A mustache template handler will return a `MustacheEvaluationContext.MapType` object as a result from its `PageHandler.valuesForResponse` function.
 public class MustacheEvaluationContext {
+	var mapValues: MapType
 	
 	public typealias MapType = [String:Any]
 	public typealias SequenceType = [MapType]
-	
 	/// The parent of this context
 	public var parent: MustacheEvaluationContext? = nil
-	
 	/// Complete path to the file being processed
 	public var templatePath: String?
-	
 	/// Mustache content for dynamic generation
 	public var templateContent: String?
-	
 	/// Returns the name of the current template file.
 	public var templateName: String? {
 		let nam = templatePath?.lastFilePathComponent
 		return nam
 	}
-	
-	var mapValues: MapType
 	
 	public init(templatePath: String, map: MapType = MapType()) {
 		self.templatePath = templatePath
@@ -196,7 +162,6 @@ public class MustacheEvaluationContext {
 	/// - returns: The value, if found, or nil
 	public func getValue(named nam: String) -> MapType.Value? {
 		let values = nam.components(separatedBy: ".")
-		
 		var cntxt: MapType.Value? = mapValues
 		for val in values {
 			guard let prev = cntxt as? MapType else {
@@ -204,7 +169,6 @@ public class MustacheEvaluationContext {
 			}
 			cntxt = prev[val]
 		}
-		
 		let v = cntxt
 		if v == nil && parent != nil {
 			return parent?.getValue(named: nam)
@@ -228,48 +192,6 @@ public class MustacheEvaluationContext {
 			return self.parent!.getCurrentFilePath()
 		}
 		return nil
-	}
-}
-
-/// This class represents an individual scope for mustache template values.
-/// A mustache template handler will return a `MustacheWebEvaluationContext.MapType` object as a result from its `PageHandler.valuesForResponse` function.
-public class MustacheWebEvaluationContext: MustacheEvaluationContext {
-	
-	/// Provides access to the current HTTPResponse object.
-	public var webResponse: HTTPResponse
-	
-	/// Provides access to the current HTTPRequest object.
-	public var webRequest: HTTPRequest {
-		return webResponse.request
-	}
-	
-	init(webResponse: HTTPResponse, templatePath: String, map: MapType = MapType()) {
-		self.webResponse = webResponse
-		super.init(templatePath: templatePath, map: map)
-	}
-	
-	init(webResponse: HTTPResponse, map: MapType = MapType()) {
-		self.webResponse = webResponse
-		super.init(map: map)
-	}
-	
-	override func newChildContext() -> MustacheEvaluationContext {
-		let cc = MustacheWebEvaluationContext(webResponse: webResponse)
-		cc.parent = self
-		return cc
-	}
-	
-	override func newChildContext(withMap with: MapType) -> MustacheEvaluationContext {
-		let cc = MustacheWebEvaluationContext(webResponse: webResponse, map: with)
-		cc.parent = self
-		return cc
-	}
-	
-	/// All the template values have been completed and resulting content should be
-	/// formulated and returned to the client.
-	public func requestCompleted(withCollector collector: MustacheEvaluationOutputCollector) throws {
-		self.webResponse.appendBody(string: try self.formulateResponse(withCollector: collector))
-		self.webResponse.completed()
 	}
 }
 
@@ -368,11 +290,9 @@ public class MustacheTag {
 	/// Reconstitutes the tag into its original source string form.
 	/// - returns: The resulting string, including the original delimiters and tag-type marker.
 	public func description() -> String {
-		
 		guard type != .plain else {
 			return tag
 		}
-		
 		var s = delimOpen()
 		switch type {
 		case .name:
@@ -406,7 +326,6 @@ public class MustacheTag {
 
 /// A sub-class of MustacheTag which represents a mustache "partial" tag.
 public class MustachePartialTag : MustacheTag {
-	
 	override func clone() -> MustacheTag {
 		let s = MustachePartialTag()
 		self.populateClone(s)
@@ -415,7 +334,6 @@ public class MustachePartialTag : MustacheTag {
 	
 	/// Override for evaluating the partial tag.
 	public override func evaluate(context contxt: MustacheEvaluationContext, collector: MustacheEvaluationOutputCollector) {
-		
 		guard let page = contxt.getCurrentFilePath(), !page.isEmpty else {
 			print("Exception while executing partial \(tag): unable to find template root directory")
 			return
@@ -673,21 +591,17 @@ public class MustacheParser {
 	/// - throws: `MustacheError.SyntaxError`
 	/// - returns: A `MustacheTemplate` object which can be evaluated.
 	public func parse(string strng: String) throws -> MustacheTemplate {
-		
 		let t = MustacheTemplate()
 		self.activeList = t
 		self.g = strng.unicodeScalars.makeIterator()
-		
 		try consumeLoop()
-		
 		t.pragmas = pragmas
-		
 		return t
 	}
 	
 	func next() -> UnicodeScalar? {
 		offset += 1
-		return g!.next()
+		return g?.next()
 	}
 	
 	func consumeLoop() throws {
@@ -712,24 +626,19 @@ public class MustacheParser {
 	func addChild(_ t: MustacheTag) {
 		self.activeList!.children.append(t)
 		t.parent = self.activeList!
-		
 		t.openD = openDelimiters
 		t.closeD = closeDelimiters
 	}
 	
 	// Read until delimiters are encountered
 	func consumePlain() -> MustacheTagType {
-		
 		let currTag = MustacheTag()
 		currTag.type = .plain
-		
 		addChild(currTag)
-		
 		while true {
 			guard let e = next() else {
 				return .none
 			}
-			
 			if e == openDelimiters[0] {
 				testingPutback = String(e)
 				if consumePossibleOpenDelimiter(index: 1) {
@@ -770,12 +679,10 @@ public class MustacheParser {
 	
 	// Read until delimiters are encountered
 	func consumeTag() throws -> MustacheTagType {
-		
 		if let e = skipWhiteSpace() {
 			// e is first non-white character
 			// # ^ ! >
 			switch e {
-				
 			case "%": // pragma
 				let tagName = consumeTagName(firstChar: skipWhiteSpace())
 				let newTag = MustachePragmaTag()
@@ -862,11 +769,9 @@ public class MustacheParser {
 	// reads until closing delimiters
 	// firstChar was read as part of previous step and should be added to the result
 	func consumeTagName(firstChar first: UnicodeScalar?) -> String {
-		
 		guard let f = first else {
 			return ""
 		}
-		
 		var s = String(f)
 		return consumeTagName(into: &s)
 	}
@@ -970,4 +875,3 @@ public class MustacheParser {
 		closeDelimiters = close
 	}
 }
-
