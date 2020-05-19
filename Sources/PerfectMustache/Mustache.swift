@@ -17,31 +17,29 @@
 //===----------------------------------------------------------------------===//
 //
 
-import PerfectThread
 import PerfectLib
 import Foundation
 
 let mustacheExtension = "mustache"
 
 private var mustacheTemplateCache = [String: (Int, MustacheTemplate)]()
-private let mustacheTemplateCacheLock = Threading.RWLock()
+private let mustacheTemplateCacheQueue = DispatchQueue(label: "mustacheTemplateCache", attributes: .concurrent)
 
 private func getTemplateFromCache(_ path: String) throws -> MustacheTemplate {
 	let file = File(path)
-	var template: MustacheTemplate?
 	let modDate = file.modificationTime
-	
-	mustacheTemplateCacheLock.doWithReadLock {
+	var template: MustacheTemplate? = mustacheTemplateCacheQueue.sync {
 		if let fnd = mustacheTemplateCache[path], fnd.0 == modDate {
-			template = fnd.1.clone() as? MustacheTemplate
+			return fnd.1.clone() as? MustacheTemplate
 		}
+		return nil
 	}
 	if let templateW = template?.clone() as? MustacheTemplate {
 		return templateW
 	}
-	try mustacheTemplateCacheLock.doWithWriteLock {
+	template = try mustacheTemplateCacheQueue.sync(flags: .barrier) {
 		if let fnd = mustacheTemplateCache[path], fnd.0 == modDate {
-			template = fnd.1.clone() as? MustacheTemplate
+			return fnd.1.clone() as? MustacheTemplate
 		} else {
 			try file.open()
 			defer { file.close() }
@@ -51,7 +49,7 @@ private func getTemplateFromCache(_ path: String) throws -> MustacheTemplate {
 			let str = UTF8Encoding.encode(bytes: bytes)
 			let templateW = try parser.parse(string: str)
 			mustacheTemplateCache[path] = (modDate, templateW)
-			template = templateW.clone() as? MustacheTemplate
+			return templateW.clone() as? MustacheTemplate
 		}
 	}
 	guard let templateW = template else {
